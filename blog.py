@@ -28,6 +28,10 @@ class LoginForm(Form):
     username = StringField("Kullanıcı Adı")
     password = PasswordField("Şifre")
 
+class ArticleForm(Form):
+    header = StringField("Başlık", validators=[validators.DataRequired()])
+    content = TextAreaField("Konu", validators=[validators.DataRequired()])
+
 app = Flask(__name__)
 app.config["MYSQL_HOST"] = "localhost"
 app.config["MYSQL_USER"] = "root"
@@ -92,5 +96,33 @@ def logout():
     session.clear()
     flash("Başarıyla çıkış yapıldı.", "success")
     return (redirect(url_for("index")))
+
+@app.route("/addarticle", methods = ["GET","POST"])
+@login_required
+def add_article():
+    form = ArticleForm(request.form)
+    if (request.method == "POST" and form.validate()):
+        author = session["username"]
+        header = form.header.data
+        content = form.content.data
+        cursor = mysql.connection.cursor()
+        cursor.execute("Insert into articles(header, author, content) values(%s, %s, %s)", (header, author, content,))
+        mysql.connection.commit()
+        cursor.close()
+        flash("Makale başarıyla eklendi.","success")
+        return(redirect(url_for("dashboard")))
+    return (render_template("addarticle.html",form = form))
+
+@app.route("/articles")
+def articles():
+    cursor = mysql.connection.cursor()
+    res = cursor.execute("Select * from articles Where article_id between 1 and 10")
+    if (res > 0):
+        articles = cursor.fetchall()
+        return(render_template("articles.html", articles = articles))
+    else:
+        flash("Gösterilecek makale bulunamadı.","danger")
+        return(render_template("articles.html", articles=[]))
+
 if(__name__ == "__main__"):
     app.run(debug=True)

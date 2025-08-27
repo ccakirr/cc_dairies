@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+{% block body %}
+    <h1><strong>Makaleler</strong></h1>
+    <hr>
+    <div class="jumbotron">
+        <ul>
+            {% for article in articles %}
+                <h3><b>{{ article.article_id }} - {{ article.header }}</b></h3>
+                <hr>
+                {{ article.content }}
+                <hr>
+                <li>Yazar: {{ article.author }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endblock %}
