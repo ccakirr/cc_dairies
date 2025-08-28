@@ -3,6 +3,7 @@ from flask_mysqldb import MySQL
 from wtforms import Form, StringField,TextAreaField,PasswordField,validators
 from passlib.hash import sha256_crypt
 from functools import wraps
+import datetime
 
 #kullanıcı giriş decorator' ı
 def login_required(f):
@@ -87,10 +88,16 @@ def login():
             flash("Hatalı kullanıcı adı.","danger")
             return redirect(url_for("login"))
     return (render_template("login.html",form=form))
-@app.route("/dashboard")
+@app.route("/dashboard", methods = ["POST","GET"])
 @login_required
 def dashboard():
-    return(render_template("dashboard.html"))
+    cursor = mysql.connection.cursor()
+    data = cursor.execute("Select * from articles where author = %s",(session["username"],))
+    if (data > 0):
+        articles = cursor.fetchall()
+        return(render_template("dashboard.html",articles = articles))
+    else:
+        return(render_template("dashboard.html", articles=[]))
 @app.route("/logout")
 def logout():
     session.clear()
@@ -123,6 +130,20 @@ def articles():
     else:
         flash("Gösterilecek makale bulunamadı.","danger")
         return(render_template("articles.html", articles=[]))
+
+@app.route("/delarticle/<string:id>")
+@login_required
+def delete_article(id):
+    cursor = mysql.connection.cursor()
+    res = cursor.execute("Select * from articles where author = %s and article_id = %s", (session["username"], id,))
+    if (res > 0):
+        cursor.execute("Delete from articles where article_id = %s",(id,))
+        mysql.connection.commit()
+        flash("Makale başarıyla silindi.","success")
+        return(redirect(url_for("dashboard")))
+    else:
+        flash("Böyle bir makale bulunaadı.","danger")
+        return(redirect(url_for("dashboard")))
 
 if(__name__ == "__main__"):
     app.run(debug=True)

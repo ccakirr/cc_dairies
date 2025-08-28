@@ -3,8 +3,26 @@
     <h3>Makalelerim</h3>
     <small>Hoşgeldin {{session["username"]}}</small>
     <hr>
-    <a href="/addarticle" class = "btn btn-danger">Makale Ekle</a>
     <div class = "jumbotron">
-
+        {% if articles %}
+                    <table>
+                      <tr>
+                        <th>Makale ID</th>
+                        <th>Makale Adı</th>
+                        <th>Yayınlanma tarihi</th>
+                      </tr>
+                        {% for article in articles %}
+                      <tr>
+                        <td>{{article.article_id}}</td>
+                        <td>{{article.header}}</td>
+                        <td>{{article.publish_date}}</td>
+                          <td><a href="/delarticle/{{ article.article_id }}" class = "btn btn-danger">Sil</a></td>
+                      </tr>
+                    </table>
+            {% endfor %}
+        {% else %}
+            <div class = "alert alert-danger"> Kaydedilmiş makaleniz bulunmadı. </div>
+        {% endif %}
     </div>
+    <a href="/addarticle" class = "btn btn-danger">Makale Ekle</a>
 {% endblock body%}
