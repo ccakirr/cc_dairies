@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% block body %}
-    <h3>Makalelerim</h3>
-    <small>Hoşgeldin {{session["username"]}}</small>
+    <h1>Makalelerim</h1>
+    <h4>Hoşgeldin {{session["username"]}}</h4>
     <hr>
     <div class = "jumbotron">
         {% if articles %}
@@ -16,7 +16,8 @@
                         <td>{{article.article_id}}</td>
                         <td>{{article.header}}</td>
                         <td>{{article.publish_date}}</td>
-                          <td><a href="/delarticle/{{ article.article_id }}" class = "btn btn-danger">Sil</a></td>
+                          <td><a href="/edit/{{ article.article_id }}" class = "btn btn-danger">Güncelle</a>
+                              <a href="/delarticle/{{ article.article_id }}" class = "btn btn-danger">Sil</a></td>
                       </tr>
                     </table>
             {% endfor %}

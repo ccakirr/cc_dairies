@@ -5,11 +5,18 @@
     <div class="jumbotron">
         <ul>
             {% for article in articles %}
-                <h3><b>{{ article.article_id }} - {{ article.header }}</b></h3>
-                <hr>
-                {{ article.content }}
-                <hr>
-                <li>Yazar: {{ article.author }}</li>
+                <hr style="height: 2px; background-color: #6c757d; border: none;">
+
+                    <h3>
+                      <b>
+                        <a href="/article/{{ article.article_id }}" class="article-link">
+                          {{ article.header }}
+                          <span class="article-author">- {{ article.author }}</span>
+                        </a>
+                      </b>
+                    </h3>
+                <hr style="height: 2px; background-color: #6c757d; border: none;">
+
             {% endfor %}
         </ul>
     </div>

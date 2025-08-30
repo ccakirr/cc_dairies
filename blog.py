@@ -3,9 +3,7 @@ from flask_mysqldb import MySQL
 from wtforms import Form, StringField,TextAreaField,PasswordField,validators
 from passlib.hash import sha256_crypt
 from functools import wraps
-import datetime
 
-#kullanıcı giriş decorator' ı
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -88,6 +86,7 @@ def login():
             flash("Hatalı kullanıcı adı.","danger")
             return redirect(url_for("login"))
     return (render_template("login.html",form=form))
+
 @app.route("/dashboard", methods = ["POST","GET"])
 @login_required
 def dashboard():
@@ -98,6 +97,7 @@ def dashboard():
         return(render_template("dashboard.html",articles = articles))
     else:
         return(render_template("dashboard.html", articles=[]))
+
 @app.route("/logout")
 def logout():
     session.clear()
@@ -123,13 +123,37 @@ def add_article():
 @app.route("/articles")
 def articles():
     cursor = mysql.connection.cursor()
-    res = cursor.execute("Select * from articles Where article_id between 1 and 10")
+    res = cursor.execute("Select * from articles")
     if (res > 0):
         articles = cursor.fetchall()
         return(render_template("articles.html", articles = articles))
     else:
-        flash("Gösterilecek makale bulunamadı.","danger")
         return(render_template("articles.html", articles=[]))
+
+@app.route("/edit/<string:id>", methods = ["GET","POST"] )
+@login_required
+def edit_article(id):
+    cursor = mysql.connection.cursor()
+    if (request.method == "GET"):
+        result = cursor.execute("Select * from articles where article_id = %s and author = %s", (id, session["username"],))
+        if (not result):
+            flash("Böyle bir makale yok veya böyle bir yetkiniz yok.", "danger")
+            redirect(url_for("index"))
+        else:
+            article = cursor.fetchone()
+            form = ArticleForm()
+            form.header.data = article["header"]
+            form.content.data = article["content"]
+            return (render_template("update.html", form = form))
+    else:
+        form = ArticleForm(request.form)
+        new_header = form.header.data
+        new_content = form.content.data
+        cursor.execute("Update articles set header=%s, content=%s where article_id = %s and author = %s", (new_header, new_content, id, session["username"],))
+        mysql.connection.commit()
+        flash("Makale başarıyla güncellendi.","success")
+        return(redirect(url_for("dashboard")))
+    cursor.close()
 
 @app.route("/delarticle/<string:id>")
 @login_required
@@ -144,6 +168,17 @@ def delete_article(id):
     else:
         flash("Böyle bir makale bulunaadı.","danger")
         return(redirect(url_for("dashboard")))
+
+@app.route("/article/<string:id>")
+def article_detail(id):
+    cursor = mysql.connection.cursor()
+    res = cursor.execute("Select * from articles where article_id = %s", (id,))
+    if (res > 0):
+        article = cursor.fetchone()
+        return (render_template("article.html", article=article))
+    else:
+        flash("Gösterilecek makale bulunamadı.", "danger")
+        return (render_template("article.html", articles=[]))
 
 if(__name__ == "__main__"):
     app.run(debug=True)

@@ -28,6 +28,23 @@
 
     tr:hover {background-color: coral;}
   </style>
+    <style>
+        .article-link{
+          display: inline-flex;
+          align-items: baseline;
+          gap: 10px;              /* boşluğu buradan ver */
+          color: #000;
+          text-decoration: none;
+        }
+        .article-link:hover{
+          color: #000;
+        }
+        .article-author{
+          margin: 0;              /* eski margin-left’i kaldır */
+          font-weight: 400;
+          color: #444;
+        }
+    </style>
 </head>
 <body>
     {% include "includes/navbar.html"%}
